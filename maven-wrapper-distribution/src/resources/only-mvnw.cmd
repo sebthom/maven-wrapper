@@ -51,9 +51,15 @@ if ($env:MVNW_VERBOSE -eq "true") {
 }
 
 # calculate distributionUrl, requires .mvn/wrapper/maven-wrapper.properties
-$distributionUrl = (Get-Content -Raw "$scriptDir/.mvn/wrapper/maven-wrapper.properties" | ConvertFrom-StringData).distributionUrl
+$wrapperProperties = (Get-Content -Raw "$scriptDir/.mvn/wrapper/maven-wrapper.properties" | ConvertFrom-StringData)
+$distributionUrl = $wrapperProperties.distributionUrl
 if (!$distributionUrl) {
-  Write-Error "cannot read distributionUrl property in $scriptDir/.mvn/wrapper/maven-wrapper.properties"
+  $distributionVersion = $wrapperProperties.distributionVersion
+  if ($distributionVersion) {
+    $distributionUrl = "https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/$distributionVersion/apache-maven-$distributionVersion-bin.zip"
+  } else {
+    Write-Error "cannot read mavenVersion or distributionUrl property from $scriptDir/.mvn/wrapper/maven-wrapper.properties"
+  }
 }
 
 switch -wildcard -casesensitive ( $($distributionUrl -replace '^.*/','') ) {
